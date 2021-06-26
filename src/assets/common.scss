@@ -1,0 +1,27 @@
+/*css reset*/
+html,body,h1,h2,h3,h4,h5{ margin: 0;padding:0; color: #333;  font-family: 'Microsoft YaHei UI', Arial, sans-serif; font-size:14px; }
+p{ margin: 0;padding: 0;}
+body{position: relative; background-color: rgb(240, 242, 245); overflow: hidden; }
+ul,li{ margin:0; padding:0; list-style: none;}
+a{text-decoration: none;}
+
+/*滚动条样式*/
+.iscroll{
+  overflow: auto;
+}
+.iscroll::-webkit-scrollbar {
+  width: 6px;
+  height:6px;
+}
+.iscroll::-webkit-scrollbar-thumb {
+  border-radius: 10px;
+  -webkit-box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
+  background: rgba(0,0,0,0.2);
+}
+.iscroll::-webkit-scrollbar-track {
+  -webkit-box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
+  border-radius: 0;
+  background: rgba(0,0,0,0.1);
+}
+
+#app { position: fixed;  top: 0;  left: 0; right:0; bottom:0;  -webkit-font-smoothing: antialiased;  -moz-osx-font-smoothing: grayscale; }
