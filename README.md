@@ -1,24 +1,11 @@
 # study-arcgis
 
-## Project setup
-```
-npm install
-```
+Some Demo of Gis using arcgis api for js
 
-### Compiles and hot-reloads for development
+## launch project
 ```
+npm i
 npm run serve
+
 ```
 
-### Compiles and minifies for production
-```
-npm run build
-```
-
-### Lints and fixes files
-```
-npm run lint
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
