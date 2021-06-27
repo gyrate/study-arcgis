@@ -54,6 +54,7 @@
       this.initMap()
       this.initBind()
       this.initDeviceLayer()
+      this.initFaces()
       // this.initDraw()
     },
     methods: {
@@ -103,7 +104,8 @@
           // console.log([longitude, latitude])
 
           const time = new Date().getTime()
-          console.log(`{"id":"${time}", "deviceUid": "${time}", "location": [${[longitude, latitude]}], "deviceStatus": "UNACTIVATED"},`)
+          // console.log(`{"id":"${time}", "deviceUid": "${time}", "location": [${[longitude, latitude]}], "deviceStatus": "UNACTIVATED"},`)
+          console.log(`[${[longitude, latitude]}]`)
 
           //todo：获取多个同位置graphic
           // _view.hitTest(event).then((res) => {
@@ -346,7 +348,57 @@
           })
 
         })
+      },
+
+      //置入一些gif图片
+      initFaces(){
+
+        const graphicsLayer = new GraphicsLayer({
+          id: 'warning',
+          title: '告警图层'
+        })
+        this.map.add(graphicsLayer);
+
+        const arr = [
+           [113.51816871947844,22.739529066560554]
+          ,[113.53705147094325,22.725913004720613]
+          ,[113.5404846984823,22.699943735078694]
+          ,[113.51336220092375,22.71482916304153]
+          ,[113.54151466674402,22.74712813937304]
+          ,[113.55593422240807,22.726863006513916]
+          ,[113.55696419066979,22.704694579392765]
+          ,[113.59232643432209,22.687274011342428]
+          ,[113.60296943969317,22.70976196499587]
+          ,[113.57790687865804,22.770872517966353]
+          ,[113.55833748168541,22.78131873642898]
+          ,[113.45843056029884,22.773088449309192]
+          ,[113.46186378783788,22.791764155078475]
+          ,[113.51851204223235,22.798727323029638]
+          ,[113.57344368285726,22.783534498138383]
+        ]
+
+        const markers = []
+        arr.forEach(([x,y])=>{
+          const marker = new Graphic({
+            geometry: {
+              type: "point",
+              x,
+              y,
+            },
+            attributes:{},
+            symbol: {
+              type: "picture-marker",
+              url: `${process.env.BASE_URL}/static/images/gif/oh.gif`,
+              width: "30",
+              height: "30"
+            }
+          })
+          markers.push(marker)
+        })
+        graphicsLayer.addMany(markers)
+
       }
+
     }
   }
 </script>
