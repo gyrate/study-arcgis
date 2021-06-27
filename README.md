@@ -2,7 +2,7 @@
 
 Some Demo of Gis using arcgis api for js
 
-<img src="https://raw.githubusercontent.com/gyrate/study-arcgis/85152c7da255300347884e09bc76dd186378e586/public/static/images/gif/demo1.gif" />
+<img src="/gyrate/study-arcgis/blob/main/public/static/images/gif/demo1.gif?raw=true" />
 
 ## launch project
 ```
