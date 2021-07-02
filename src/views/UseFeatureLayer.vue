@@ -204,10 +204,10 @@
                 type: "size",
                 valueExpression: "$view.scale",
                 stops: [
-                  { value: 500000, size: 1 },
-                  { value: 250000, size: 5 },
+                  { value: 500000, size: 2 },
+                  { value: 250000, size: 10 },
                   { value: 125000, size: 15 },
-                  { value: 32000, size: 20 },
+                  { value: 32000, size: 30 },
                 ]
               }
             ]
@@ -325,7 +325,29 @@
 
           axios.get(`${process.env.BASE_URL}/static/mockData.json`).then(res=>{
 
-            const data = res.data.data
+            var data = res.data.data
+
+            //创建更多模拟数据
+            const moreData = []
+            data.forEach(item => {
+              for (let i = 0; i < 100; i++){
+                let [longitude, latitude] = item.location
+                let random1 = Math.random()
+                let random2 = Math.random()
+                let id =  new Date().getTime()
+                longitude += (random1 > 0.4 ? 1 : -1) * random1 * 1
+                latitude += (random2 > 0.4 ? 1 : -1) * random2 * 1
+                moreData.push({
+                  id,
+                  deviceUid: id,
+                  location: [longitude, latitude],
+                  deviceStatus: "UNACTIVATED"
+                })
+              }
+            })
+            data = data.concat(moreData)
+            console.log(`data count: ${data.length}`)
+
             this.countDeviceData(data)
 
             const graphics = []
