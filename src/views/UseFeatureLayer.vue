@@ -431,55 +431,40 @@
   }
 </style>
 <style lang="scss" type="text/scss" scoped>
-  .wrap {
+
+  .map-point-tip{
+    position: absolute;
+    top:-9999px;
+    left: -9999px;
+    padding: .4em ;
+    border-radius: 4px;
+    background-color: #0f286a;
+    transition: all .3s;
+    color: #fff;
+    font-size: 14px;
+    max-width: 220px;
+  }
+
+  .filter-panel {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    top: 2em;
+    right: 2em;
+    background-color: #fff;
 
-    .container{
-      position: absolute;
-      top: 0;
-      left: 0;
-      height: 100%;
-      width: 100%;
-    }
+    li {
+      padding: 0.5em 1em 0.5em 2.3em;
+      background: transparent url("~@/assets/image/ico-checkbox.svg") no-repeat 8px center;
+      cursor: pointer;
+      text-align: left;
 
-    .map-point-tip{
-      position: absolute;
-      top:-9999px;
-      left: -9999px;
-      padding: .4em ;
-      border-radius: 4px;
-      background-color: #0f286a;
-      transition: all .3s;
-      color: #fff;
-      font-size: 14px;
-      max-width: 220px;
-    }
-
-    .filter-panel{
-      position: fixed;
-      top: 2em;
-      right: 2em;
-      background-color: #fff;
-
-      li{
-        padding: 0.5em 1em  0.5em 2.3em;
-        background:transparent url("~@/assets/image/ico-checkbox.svg") no-repeat 8px center;
-        cursor: pointer;
-        text-align: left;
-
-        &.active{
-          background:transparent url("~@/assets/image/ico-checkbox2.svg") no-repeat 8px center;
-        }
-        &:hover{
-          background-color: #0088ee;
-          color: #fff;
-        }
-
+      &.active {
+        background: transparent url("~@/assets/image/ico-checkbox2.svg") no-repeat 8px center;
       }
+      &:hover {
+        background-color: #0088ee;
+        color: #fff;
+      }
+
     }
   }
 </style>
