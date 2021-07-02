@@ -17,11 +17,15 @@ const routes = [
     path: '/featureLayer',
     name: '显示海量点标记',
     component:()=> import(`@/views/UseFeatureLayer.vue`)
-  },{
-  path: '/query',
+  }, {
+    path: '/query',
     name: '图层特征查找',
-    component:()=> import(`@/views/QueryFeatureLayer.vue`)
-}
+    component: () => import(`@/views/QueryFeatureLayer.vue`)
+  }, {
+    path: '/draw',
+    name: '绘制覆盖物',
+    component:()=> import(`@/views/DrawGeometry.vue`)
+  }
 ]
 
 const router = new VueRouter({
