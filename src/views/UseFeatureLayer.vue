@@ -335,8 +335,8 @@
                 let random1 = Math.random()
                 let random2 = Math.random()
                 let id =  new Date().getTime()
-                longitude += (random1 > 0.4 ? 1 : -1) * random1 * 1
-                latitude += (random2 > 0.4 ? 1 : -1) * random2 * 1
+                longitude += (random1 > 0.5 ? 1 : -1) * random1 * 1
+                latitude += (random2 > 0.5 ? 1 : -1) * random2 * 1
                 moreData.push({
                   id,
                   deviceUid: id,
