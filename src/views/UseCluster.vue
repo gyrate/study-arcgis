@@ -16,12 +16,14 @@
 </template>
 
 <script>
+  // 参考案例
+  // https://developers.arcgis.com/javascript/latest/sample-code/sandbox/?sample=featurereduction-cluster-query
+
   import axios from 'axios'
   import Map from '@arcgis/core/Map';
   import Graphic from '@arcgis/core/Graphic';
   import LayerList from '@arcgis/core/widgets/LayerList'
   import MapView from '@arcgis/core/views/MapView';
-  // import SceneView  from '@arcgis/core/views/SceneView';
   import FeatureLayer from '@arcgis/core/layers/FeatureLayer';
 
   import GraphicsLayer  from '@arcgis/core/layers/GraphicsLayer';
@@ -124,7 +126,7 @@
           clusterRadius: "100px",
           popupTemplate: {
             title: "设备聚合",
-            content: "共有{cluster_count}个设备",
+            content: "共有{cluster_count}个设备,状态为{cluster_type_91c828acc5960230bb07c9e0e6781429}的设备占比最多",
             fieldInfos: [
               {
                 fieldName: "cluster_count",
