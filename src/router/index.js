@@ -17,6 +17,10 @@ const routes = [
     path: '/featureLayer',
     name: '显示海量点标记',
     component:()=> import(`@/views/UseFeatureLayer.vue`)
+  },{
+    path: '/cluster',
+    name: '配置聚合功能',
+    component:()=> import(`@/views/UseCluster.vue`)
   }, {
     path: '/query',
     name: '图层特征查找',
