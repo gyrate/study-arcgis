@@ -23,7 +23,7 @@ const routes = [
     component:()=> import(`@/views/UseCluster.vue`)
   }, {
     path: '/query',
-    name: '图层特征查找',
+    name: '图层查找功能',
     component: () => import(`@/views/QueryFeatureLayer.vue`)
   }, {
     path: '/polygon',

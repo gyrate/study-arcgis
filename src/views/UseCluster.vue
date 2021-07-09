@@ -91,6 +91,10 @@
 
           this.view.hitTest(event).then((res) => {
 
+            if (!res.results || !res.results.length) {
+              return
+            }
+
             const {attributes} = res.results[0].graphic
             console.log(`attribute：${JSON.stringify(attributes)}`)
           })
