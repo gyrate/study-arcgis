@@ -21,6 +21,7 @@
   import axios from 'axios'
   import Map from '@arcgis/core/Map';
   import Graphic from '@arcgis/core/Graphic';
+  import Point from '@arcgis/core/geometry/Point'
   import LayerList from '@arcgis/core/widgets/LayerList'
   import MapView from '@arcgis/core/views/MapView';
   // import SceneView  from '@arcgis/core/views/SceneView';
@@ -99,18 +100,21 @@
       initBind() {
 
         this.view.on('click', (event) => {
-
           const {longitude, latitude} = event.mapPoint
-          // console.log([longitude, latitude])
-
-          const time = new Date().getTime()
-          // console.log(`{"id":"${time}", "deviceUid": "${time}", "location": [${[longitude, latitude]}], "deviceStatus": "UNACTIVATED"},`)
           console.log(`[${[longitude, latitude]}]`)
 
-          //todo：获取多个同位置graphic
-          // _view.hitTest(event).then((res) => {
-          //   console.log(res.results)
-          // })
+            //平移到点
+            this.view.goTo({
+              center: new Point({
+                x: longitude,
+                y: latitude
+              }),
+              scale: 30000
+            }).then(()=>{
+
+              console.log('平移')
+            })
+
         })
 
         this.view.on("pointer-move", (event) => {

@@ -26,6 +26,10 @@ const routes = [
     name: '图层特征查找',
     component: () => import(`@/views/QueryFeatureLayer.vue`)
   }, {
+    path: '/polygon',
+    name: '区域多边形',
+    component: () => import(`@/views/PolygonLayer.vue`)
+  }, {
     path: '/draw',
     name: '绘制覆盖物',
     component:()=> import(`@/views/DrawGeometry.vue`)
