@@ -33,6 +33,10 @@ const routes = [
     path: '/draw',
     name: '绘制覆盖物',
     component:()=> import(`@/views/DrawGeometry.vue`)
+  }, {
+    path: '/symbol3d',
+    name: '绘制覆盖物',
+    component: () => import(`@/views/Symbol3D.vue`)
   }
 ]
 
