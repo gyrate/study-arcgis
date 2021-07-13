@@ -140,7 +140,7 @@
         });
 
         const layer = new FeatureLayer({
-          title: "种树",
+          title: "路灯",
           id: "treeLayer",
           source:[],
           fields: [
@@ -270,7 +270,7 @@
           },
           geometryType: "mesh",//必要
           popupTemplate: {
-            title: "建筑",
+            title: "建筑{name}",
             content: [{
               type: "fields",
               fieldInfos: [{
