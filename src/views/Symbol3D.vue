@@ -5,6 +5,7 @@
 </template>
 
 <script>
+  import axios from 'axios'
   import SpatialReference from '@arcgis/core/geometry/SpatialReference'
   import TileLayer from '@arcgis/core/layers/TileLayer'
   import MapImageLayer from '@arcgis/core/layers/MapImageLayer'
@@ -23,6 +24,8 @@
   import ObjectSymbol3DLayer from "@arcgis/core/symbols/ObjectSymbol3DLayer"
   import SimpleRenderer from '@arcgis/core/renderers/SimpleRenderer'
 
+  import Sketch from '@arcgis/core/widgets/Sketch'
+
   export default {
     name: 'Symbol3D',
     components: {},
@@ -32,13 +35,16 @@
     mounted() {
       this.init()
       this.initTreeLayer()
+      this.initPolygonLayer()
       this.initBind()
+      this.initDraw()
     },
     methods: {
       init(){
         //创建地图
         const map = new Map({
-          basemap: "hybrid", //卫星图
+          basemap: "topo", //矢量图
+          // basemap: "hybrid", //卫星图
           ground: "world-elevation"//地形
         })
 
@@ -84,9 +90,10 @@
         window._view = this.view = view
       },
 
+      //灯杆图层
       initTreeLayer(){
 
-        const source = this.getData()
+        const source = this.getPoleData()
         const renderer = new SimpleRenderer({
           symbol : {
             type: "point-3d",
@@ -96,9 +103,9 @@
                 href: `${process.env.BASE_URL}/static/gltf/Light_On_Post_-_Light_on.glb`,
               },
               material: { color: "red" },
-              width: 5,
-              height: 40,
-              depth: 5,
+              width: 3,
+              height: 20,
+              depth: 3,
             }]
           },
           // symbol: {
@@ -112,6 +119,7 @@
           //   field: "height",
           //   valueUnit: "feet"
           // },{
+            //todo: 修改朝向roll heading
               type: "color",
               field: "storage", // Carbon storage
               stops: [
@@ -172,7 +180,8 @@
 
       },
 
-      getData(){
+      //灯杆数据
+      getPoleData(){
 
         const arr = [
           [113.54792137639583,22.76428599456751],
@@ -220,14 +229,152 @@
         return graphics
       },
 
+      //多边形图层
+      async initPolygonLayer(){
+
+        const renderer = new SimpleRenderer({
+          symbol : {
+            type: "polygon-3d",
+            symbolLayers: [{
+              type: "extrude",
+              size: 100,
+              material: { color: "#fff" },
+              edges: {
+                type: "solid", // autocasts as new SolidEdges3D()
+                color: [50, 50, 50, 0.5]
+              }
+            }],
+          },
+          visualVariables: [
+            {
+              type: "size",
+              field: "height"
+            }
+          ]
+        })
+
+        const layer = new FeatureLayer({
+          title: "建筑",
+          id: "polygonLayer",
+          source: [],
+          fields: [
+            {name: "ObjectID", alias: "ObjectID", type: "oid"},
+            {name: "height", type: "integer"},
+            {name: "name", type: "string"},
+          ],
+          outFields: ['*'],
+          objectIdField: "ObjectID",
+          renderer,
+          spatialReference: {
+            wkid: 4326
+          },
+          geometryType: "mesh",//必要
+          popupTemplate: {
+            title: "建筑",
+            content: [{
+              type: "fields",
+              fieldInfos: [{
+                fieldName: "height",
+                label: "高度",
+                visible: false
+              }]
+            }]
+          },
+        })
+        this.map.add(layer)
+
+        const source = await  this.getPolygonData()
+
+        layer.applyEdits({addFeatures: source}).then(results => {
+          console.log(`addFeatures:${results.addFeatureResults.length}`)
+        }).catch(error=>{
+          debugger
+        })
+
+      },
+
+      //获取建筑数据
+      getPolygonData(){
+
+        return new Promise(resolve=>{
+
+          axios.get(`${process.env.BASE_URL}/static/nsBuildingData.json`).then(res=>{
+
+            const arr = res.data.data
+
+            const graphics = []
+            arr.forEach(item=>{
+              const {coordinates, features} = item
+              let graphic = new Graphic({
+                geometry: {
+                  type: "polygon",
+                  rings: coordinates,
+                  spatialReference: {wkid: 102100},
+                },
+                attributes: {
+                  name: features.name,
+                  height: features.height  || (50 + parseInt(Math.random() * 100))
+                }
+              })
+              graphics.push(graphic)
+
+            })
+            // console.log(res)
+            resolve(graphics)
+
+          })
+
+        })
+      },
+
       initBind() {
 
         this.view.on('click', (event) => {
           const {longitude, latitude} = event.mapPoint
           console.log(`[${[longitude, latitude]}]`)
-
         })
-      }
+      },
+
+      initDraw(){
+
+        //绘图工具
+        const drawlayer = new GraphicsLayer({
+          id: 'canvas',
+          title: '绘制面板'
+        })
+        this.map.add(drawlayer)
+        const sketch = new Sketch({
+          layer:drawlayer,
+          view: this.view,
+          creationMode: 'update'
+        })
+        this.view.ui.add(sketch, 'top-right')
+        sketch.on('update', (event) => {
+
+          if(event.graphics[0].geometry){
+
+            const geometry = event.graphics[0].geometry
+            var msg  = ''
+
+            switch(geometry.type){
+              case 'point':
+                msg = `x:${geometry.x}, y:${geometry.y}`
+                break;
+              case 'polyline':
+                msg = JSON.stringify(geometry.paths)
+                break;
+              case 'polygon':
+                msg = JSON.stringify(geometry.rings)
+                break;
+            }
+
+            console.log(msg)
+
+          }
+        })
+        this.sketch = sketch
+
+      },
 
     }
   }
