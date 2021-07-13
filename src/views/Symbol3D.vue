@@ -19,6 +19,10 @@
   import Graphic from '@arcgis/core/Graphic'
   import GraphicsLayer  from '@arcgis/core/layers/GraphicsLayer'
 
+  import PointSymbol3D from "@arcgis/core/symbols/PointSymbol3D"
+  import ObjectSymbol3DLayer from "@arcgis/core/symbols/ObjectSymbol3DLayer"
+  import SimpleRenderer from '@arcgis/core/renderers/SimpleRenderer'
+
   export default {
     name: 'Symbol3D',
     components: {},
@@ -27,7 +31,7 @@
     },
     mounted() {
       this.init()
-      this.initSymbol3DLayer()
+      this.initTreeLayer()
       this.initBind()
     },
     methods: {
@@ -35,27 +39,37 @@
         //创建地图
         const map = new Map({
           basemap: "hybrid", //卫星图
-          // ground: "world-elevation"//地形
+          ground: "world-elevation"//地形
         })
 
         //创建3D视图
         const view = new SceneView({
           container: this.$refs['dom'],
           map: map,
+          center: [113.54766657989391, 22.76579858397575],
           // scale: 2070,
-          // center: [113.54375991009947, 22.784198925484382],
-          center: [-82.44177353410794,35.61000099349824],
           camera: {
             position: {
-              x: -9177287.301365132,
-              y: 4246894.071916947,
-              z: 315.51049539633095,
+              x: 12639861.409218187,
+              y: 2602892.6764444276,
+              z: 526.4768209708855,
               spatialReference: {wkid: 102100},//必要
             },
-            tilt: 45.43021646035824,
-            fov: 55,
-            heading: 353
+            tilt: 55,
+            fov: 56,
+            heading: 14
           },
+          environment: {
+            // background: {
+            //   type: "color",
+            //   color: [255, 252, 244, 1]
+            // },
+            // lighting: {
+            //   date: Date.now(),
+            //   directShadowsEnabled: true,
+            //   ambientOcclusionEnabled: true
+            // }
+          }
         })
 
         //图层列表
@@ -70,107 +84,139 @@
         window._view = this.view = view
       },
 
-      initSymbol3DLayer(){
+      initTreeLayer(){
 
-        const renderer = {
-          type: "simple", // autocasts as new SimpleRenderer()
-          // symbol: {
-          //   type: "web-style", // autocasts as new WebStyleSymbol()
-          //   styleName: "esriRealisticTreesStyle",
-          //   name: "Other"
-          // },
+        const source = this.getData()
+        const renderer = new SimpleRenderer({
           symbol : {
             type: "point-3d",
             symbolLayers: [{
               type: "object",
               resource: {
-                href: `${process.env.BASE_URL}/static/gltf/tree.glb`,
+                href: `${process.env.BASE_URL}/static/gltf/Light_On_Post_-_Light_on.glb`,
               },
-              height: 10,
-              material: {
-                color: "red"
-              }
+              material: { color: "red" },
+              width: 5,
+              height: 40,
+              depth: 5,
             }]
           },
+          // symbol: {
+          //   type: "web-style",
+          //   styleName: "esriRealisticTreesStyle",
+          //   name: "Other"
+          // },
           label: "tree",
-          visualVariables: [
-            {
-              type: "size",
-              axis: "height",
-              field: "Height", // tree height
-              valueUnit: "feet"
-            },
-            {
+          visualVariables: [{
+          //   type: "size",
+          //   field: "height",
+          //   valueUnit: "feet"
+          // },{
               type: "color",
-              field: "C_Storage", // Carbon storage
+              field: "storage", // Carbon storage
               stops: [
                 {
                   value: 0,
                   color: "#f7fcb9"
-                }, // features with zero carbon
+                },
                 {
                   value: 10000,
                   color: "#31a354"
-                } // features with 800 carbon
+                }
               ],
               legendOptions: {
-                title: "Carbon Storage"
+                title: "storage"
               }
-            }
-          ]
-        };
+          }]
+
+        });
 
         const layer = new FeatureLayer({
-          id: 'trees',
-          url: "https://services.arcgis.com/V6ZHFr6zdgNZuVG0/arcgis/rest/services/Landscape_Trees/FeatureServer/0",
-          renderer: renderer,
+          title: "种树",
+          id: "treeLayer",
+          source:[],
           fields: [
-            {
-              name: 'Height',
-              type: 'integer'
-            },{
-              name: 'C_Storage',
-              type: 'integer'
-            }
+            {name: "ObjectID", alias: "ObjectID", type: "oid"},
+            {name: "title", alias: "title", type: "string"},
+            {name: "height", alias: "height", type: "integer"},
+            {name: "storage", alias: "storage", type: "integer"},
+            {name: "lngLat", type: "string"},
           ],
-          outFields:['*'],
-          popupTemplate:{
-            title: '{Height}'
+          outFields: ['*'],
+          objectIdField: "ObjectID",
+          renderer,
+          spatialReference: {
+            wkid: 4326
           },
-          source: []
+          geometryType: "point",//必要
+          popupTemplate: {
+            title: "{title}",
+            content: [{
+              type: "fields",
+              fieldInfos: [{
+                fieldName: "height",
+                label: "高度",
+                visible: false
+              },{
+                fieldName: "lngLat",
+                label: '经纬度',
+              }]
+            }]
+          },
         })
         this.map.add(layer)
 
-        // const source = this.getData()
-        // layer.applyEdits({addFeatures: source}).then(results => {
-        //   console.log(`addFeatures:${results.addFeatureResults.length}`)
-        // })
-      },
+        layer.applyEdits({addFeatures: source}).then(results => {
+          console.log(`addFeatures:${results.addFeatureResults.length}`)
+        })
 
+      },
 
       getData(){
 
-        const lngLat = [-82.44284792465882,35.611569122578985]
-        const graphics = []
-        for (let i = 0; i < 10; i++) {
+        const arr = [
+          [113.54792137639583,22.76428599456751],
+          [113.54765412242253,22.7645254364563],
+          [113.54735692251681,22.764795140355677],
+          [113.54702860471272,22.76506775836771],
+          [113.54679495179647,22.765300693788106],
+          [113.54646512296225,22.76559071514216],
+          [113.54617641385929,22.765827763813054],
+          [113.54593925816756,22.76606520027423],
 
+          [113.54827733113964,22.764491562772694],
+          [113.54796603753947,22.76473897646235],
+          [113.54763653901325,22.765032958471586],
+          [113.54732237877924,22.765279382463525],
+          [113.54707593274021,22.76552142913973],
+          [113.54678867579418,22.76580299973701],
+          [113.54648139141185,22.76606877290851],
+          [113.54620133835031,22.766407902370602],
+        ]
+
+        const graphics = []
+        arr.forEach((lngLat) => {
           let graphic = new Graphic({
             //每个点的地理属性
             geometry: {
               type: "point",
-              longitude: lngLat[0] + Math.random() * 0.1,
-              latitude: lngLat[1] + Math.random() * 0.1,
+              longitude: lngLat[0],
+              latitude: lngLat[1],
+              // longitude: lngLat[0] + Math.random() * 0.003 * (Math.random() > 0.5 ? 1 : -1),
+              // latitude: lngLat[1] + Math.random() * 0.003 * (Math.random() > 0.5 ? 1 : -1),
               spatialReference: {wkid: 102100},
             },
             //每个点的属性
             attributes: {
-              Height: 50,
-              C_Storage: parseInt(10000 * Math.random()),
-              id: new Date().getTime()
+              storage: 1000 + parseInt(5000 * Math.random()),
+              height: 50 ,
+              id: new Date().getTime(),
+              lngLat: lngLat
             }
           })
           graphics.push(graphic)
-        }
+        })
+
         return graphics
       },
 
