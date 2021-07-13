@@ -64,11 +64,11 @@
             //   type: "color",
             //   color: [255, 252, 244, 1]
             // },
-            // lighting: {
-            //   date: Date.now(),
-            //   directShadowsEnabled: true,
-            //   ambientOcclusionEnabled: true
-            // }
+            lighting: {
+              // date: Date.now(),
+              directShadowsEnabled: true,
+              ambientOcclusionEnabled: true
+            }
           }
         })
 
