@@ -111,7 +111,7 @@
             value: item.value,
             symbol: {
               type: "picture-marker",
-              url: `/static/images/svg/camera_m_${index + 1}.svg`
+              url: `${process.env.BASE_URL}/static/images/svg/camera_m_${index + 1}.svg`
             }
           }
         })
