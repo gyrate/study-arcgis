@@ -14,6 +14,8 @@ module.exports = {
 
   lintOnSave: false,
 
+  outputDir: 'docs',
+
   devServer: {
     port: 9090,
     proxy: {
