@@ -15,6 +15,7 @@ module.exports = {
   lintOnSave: false,
 
   outputDir: 'docs',
+  productionSourceMap: false,
 
   devServer: {
     port: 9090,
