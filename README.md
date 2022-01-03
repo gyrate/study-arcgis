@@ -2,7 +2,7 @@
 
 该工程提供了ArcGIS for javascript 常用功能的相关示例，使用arcgis版本为 4.19.*
 
-<img src="https://github.com/gyrate/study-arcgis.github.io/blob/main/public/static/images/gif/demo1.gif" width="780"/>
+https://gyrate.github.io/study-arcgis/#/featureLayer
 
 ## 目录
 
