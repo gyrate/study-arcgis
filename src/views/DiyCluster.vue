@@ -85,11 +85,23 @@
           this.resetCluster()
         })
 
+        //地图缩放
         view.watch("zoom", (e) => {
           if (this.view.zoom % 1 == 0) {
             console.log(`zoom ${this.view.zoom}`)
             this.resetCluster()
           }
+        })
+        //地图移动
+        view.on('drag', (e) => {
+          const {action} = e
+          if (action == 'end') {
+            this.resetCluster()
+          }
+        })
+        //地图尺寸
+        view.on('resize', (e) => {
+          console.log('resize')
         })
 
         this.map = map
@@ -181,41 +193,27 @@
       //重置 聚合点
       resetCluster() {
 
-        const {xmin, ymin, xmax, ymax} = this.view.extent
-        const [minX, minY] = webMercatorUtils.xyToLngLat(xmin, ymin)
-        const [maxX, maxY] = webMercatorUtils.xyToLngLat(xmax, ymax)
+        const extent = this.view.extent
+        const [xmin, ymin] = webMercatorUtils.xyToLngLat(extent.xmin, extent.ymin)
+        const [xmax, ymax] = webMercatorUtils.xyToLngLat(extent.xmax, extent.ymax)
 
         //当前的视野划分网格
         const AMOUNT = 10
-        const h = (maxY - minY) / AMOUNT
-        const w = (maxX - minX) / AMOUNT
+        const gl = Math.min(ymax - ymin, xmax - xmin) / AMOUNT
         const grids = []
 
-        for (let i = 0; i < AMOUNT; i++) {
-          for (let j = 0; j < AMOUNT; j++) {
+        for (let i = 0; ymin + gl * (i + 1) <= ymax; i++) {
+          for (let j = 0; xmin + gl * (j + 1) <= xmax; j++) {
             grids.push({
-              xmin: minX + w * j,
-              xmax: minX + w * (j + 1),
-              ymin: minY + h * i,
-              ymax: minY + h * (i + 1)
+              xmin: xmin + gl * j,
+              xmax: xmin + gl * (j + 1),
+              ymin: ymin + gl * i,
+              ymax: ymin + gl * (i + 1)
             })
           }
         }
 
         this.drawGrid(grids)
-
-        // const grids = []
-        // const UNIT = 0.2
-        // for (let i = 0; minX + UNIT * i < maxX; i++) {
-        //   for (let j = 0; minY + UNIT * j < maxY; j++) {
-        //     grids.push({
-        //       xmin: minX + UNIT * i,
-        //       xmax: minX + UNIT * (i + 1),
-        //       ymin: minY + UNIT * j,
-        //       ymax: minY + UNIT * (j + 1)
-        //     })
-        //   }
-        // }
 
         let arr = []
         grids.forEach((grid, index) => {
@@ -249,6 +247,7 @@
           x: totalX / len,
           y: totalY / len,
           count: len,
+          isCluster: len > 1 ? 1 : 0,
           id
         }
       },
@@ -299,12 +298,31 @@
             {name: "ObjectID", type: "string"},
             {name: "count", type: "string"},
             {name: "id", type: "string"},
+            {name: "isCluster", type: "integer"},
           ],
           source: [],
           visible: true,
           objectIdField: "ObjectID",
           geometryType: 'point',
-          renderer: {
+          renderer : {
+            // type: "unique-value",
+            // field: 'isCluster',
+            // defaultSymbol: {type: "simple-fill"},
+            // uniqueValueInfos: [{
+            //   value: 0,
+            //   symbol: {
+            //     type: "simple-fill",
+            //     size: '20px',
+            //     color: "#3c88ff"
+            //   }
+            // },{
+            //   value: 1,
+            //   symbol: {
+            //     type: "simple-fill",
+            //     size: '20px',
+            //     color: "#ff5b58"
+            //   }
+            // }],
             type: "simple",
             symbol: {
               type: "simple-marker",
@@ -314,20 +332,28 @@
                 width: 2,
                 color: "#fff"
               }
-            }
+            },
+            visualVariables:[{
+              type: "size",
+              field: "count",
+              minDataValue: 1,
+              maxDataValue: 100,
+              minSize: 20,
+              maxSize: 80
+            }]
           },
           labelingInfo: [new LabelClass({
             labelPlacement: 'center-center',
-            // labelExpressionInfo: {expression: "$feature.id +','+ $feature.count"},
             labelExpressionInfo: {expression: "$feature.count"},
             symbol: {
               type: "text",
               color: "#fff",
               haloSize: 1,
-              haloColor: "#FF0F43"
-            },
-            font:{
-              weight: "bold"
+              haloColor: "#FF0F43",
+              font:{
+                size: 14,
+                weight: "bold"
+              }
             }
           })]
 

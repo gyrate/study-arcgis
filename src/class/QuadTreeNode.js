@@ -1,14 +1,71 @@
-//四叉树节点
+/**
+ * 矩形范围
+ */
+class  Extent{
+  constructor(conf = {xmin: 0, ymin: 0, xmax: 100, ymax: 100}){
+
+    this.xmin = conf.xmin
+    this.ymin = conf.ymin
+    this.xmax = conf.xmax
+    this.ymax = conf.ymax
+  }
+
+  /**
+   * 判断某个点是否在当前范围内
+   * @param point
+   * @param extent 指定范围，如果不填则使用当前节点范围
+   * @returns {boolean}
+   */
+  within(point) {
+    const {x, y} = point
+    const {xmin, ymin, ymax, xmax} = this
+    if ((xmin <= x && xmax >= x) && (ymin <= y && ymax >= y)) {
+      return true
+    } else {
+      return false
+    }
+  }
+
+
+  /**
+   * 判断当前范围是否与指定范围相交
+   * 如果两个矩形相交，则两个矩形中心点间的距离肯定小于两个矩形边长和的1/2
+   * @param extent 指定范围
+   * @returns {boolean}
+   */
+  intersects(extent) {
+
+    const {xmin, ymin, xmax, ymax} = extent
+
+    //x轴 两个矩形中心点距离 * 2
+    let lx = Math.abs(this.xmax + this.xmin - xmin - xmax)
+    //x轴 两个矩形边长和
+    let bx = Math.abs(this.xmax - this.xmin + xmax - xmin)
+    //y轴 两个矩形中心点距离 * 2
+    let ly = Math.abs(this.ymax + this.ymin - ymin - ymax)
+    //y轴 两个矩形x轴边长和
+    let by = Math.abs(this.ymax - this.ymin + ymax - ymin)
+
+    if (lx <= bx && ly <= by) {
+      return true
+    } else {
+      return false
+    }
+  }
+}
+
+/**
+ * 四叉树
+ */
 class QuadTreeNode {
 
   constructor(data, conf) {
     //节点范围
-    this.extent = conf.extent || {xmin: 0, ymin: 0, xmax: 100, ymax: 100}
+    this.extent =  new Extent(conf.extent)
     // 节点数据容量
     this.bucketLimit = conf.bucketLimit || 10
     //存储的数据点
     this.points = data
-    this.pointsCount = data.length
     this.init()
   }
 
@@ -43,13 +100,13 @@ class QuadTreeNode {
 
     //填充数据
     this.points.forEach(p => {
-      if (this.northWest.within(p)) {
+      if (this.northWest.isContain(p)) {
         this.northWest.addPoint(p)
-      } else if (this.northEast.within(p)) {
+      } else if (this.northEast.isContain(p)) {
         this.northEast.addPoint(p)
-      } else if (this.southWest.within(p)) {
+      } else if (this.southWest.isContain(p)) {
         this.southWest.addPoint(p)
-      } else if (this.southEast.within(p)) {
+      } else if (this.southEast.isContain(p)) {
         this.southEast.addPoint(p)
       }
     })
@@ -64,53 +121,27 @@ class QuadTreeNode {
 
   addPoint(point) {
     this.points.push(point)
-    this.pointsCount = this.points.length
   }
 
 
   /**
    * 判断某个点是否在当前节点范围内
    * @param point
-   * @param extent 指定范围，如果不填则使用当前节点范围
    * @returns {boolean}
    */
-  within(point, extent) {
-    const {x, y} = point
-    const {xmin, ymin, ymax, xmax} = extent || this.extent
-    if ((xmin <= x && xmax >= x) && (ymin <= y && ymax >= y)) {
-      return true
-    } else {
-      return false
-    }
+  isContain(point){
+      return this.extent.within(point)
   }
-
 
   /**
    * 判断当前节点范围是否与指定范围相交
    * 如果两个矩形相交，则两个矩形中心点间的距离肯定小于两个矩形边长和的1/2
-   * @param extent 指定范围
+   * @param extent {Extent} 指定范围
    * @returns {boolean}
    */
-  intersects(extent) {
-
-    const {xmin, ymin, xmax, ymax} = extent
-
-    //x轴 两个矩形中心点距离 * 2
-    let lx = Math.abs(this.extent.xmax + this.extent.xmin - xmin - xmax)
-    //x轴 两个矩形边长和
-    let bx = Math.abs(this.extent.xmax - this.extent.xmin + xmax - xmin)
-    //y轴 两个矩形中心点距离 * 2
-    let ly = Math.abs(this.extent.ymax + this.extent.ymin - ymin - ymax)
-    //y轴 两个矩形x轴边长和
-    let by = Math.abs(this.extent.ymax - this.extent.ymin + ymax - ymin)
-
-    if (lx <= bx && ly <= by) {
-      return true
-    } else {
-      return false
-    }
+  isIntersects(extent) {
+    return this.extent.intersects(extent)
   }
-
 
   /**
    * 判断当前节点是否叶子节点
@@ -131,17 +162,20 @@ class QuadTreeNode {
    */
   findPoints(extent) {
 
-    const t = this
+    if (!(extent instanceof Extent)) {
+      extent = new Extent(extent)
+    }
+
     let arr = []
 
     function travel(node) {
 
-      if (node.intersects(extent)) {
+      if (node.isIntersects(extent)) {
 
         //如果当前四叉树节点有points，则将在extent范围内的points入栈
         if (node.points.length > 0) {
           node.points.forEach(point => {
-            if (t.within(point, extent)) {
+            if (extent.within(point)) {
               arr.push(point)
             }
           })
@@ -149,16 +183,16 @@ class QuadTreeNode {
         } else {
           const {northWest, northEast, southWest, southEast} = node
 
-          if (northWest && northWest.intersects(extent)) {
+          if (northWest && northWest.isIntersects(extent)) {
             travel(northWest)
           }
-          if (northEast && northEast.intersects(extent)) {
+          if (northEast && northEast.isIntersects(extent)) {
             travel(northEast)
           }
-          if (southWest && southWest.intersects(extent)) {
+          if (southWest && southWest.isIntersects(extent)) {
             travel(southWest)
           }
-          if (southEast && southEast.intersects(extent)) {
+          if (southEast && southEast.isIntersects(extent)) {
             travel(southEast)
           }
         }
