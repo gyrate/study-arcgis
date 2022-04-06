@@ -75,12 +75,14 @@
           await this.getData()
 
           //创建散点图层
-          this.initPointLayer()
+          // this.initPointLayer()
 
           //创建聚合图层
           this.initClusterLayer()
           //创建聚合类
+          console.time('initClusterClass')
           await this.initClusterClass()
+          console.timeEnd('initClusterClass')
 
           this.resetCluster()
         })
@@ -109,15 +111,20 @@
       },
 
       async getData() {
-        const res = await axios.get(`${process.env.BASE_URL}/static/mockData.json`)
-        this.data = res.data.data.map(item => {
+        const res = await axios.get(`${process.env.BASE_URL}/static/massiveData.json`)
+
+        //数量上20000超出浏览器负荷
+        const data = res.data.data.splice(0 ,10000)
+
+        this.data = data.map(item => {
           const {id, location} = item
           return {
             id,
-            x: location[0],
-            y: location[1]
+            x: parseFloat(location['longitude']),
+            y: parseFloat(location['latitude'])
           }
         })
+
       },
 
       //鼠标事件监听
@@ -146,7 +153,10 @@
 
         //创建四叉树
         const points = [...this.data]
-        const tree = new QuadTreeNode(points, {extent: {xmin:minX, ymin: minY, xmax: maxX, ymax: maxY}})
+        const tree = new QuadTreeNode(points, {
+            extent: {xmin: minX, ymin: minY, xmax: maxX, ymax: maxY},
+            bucketLimit: 100
+        })
         this.quadTree = tree
       },
 
@@ -332,8 +342,8 @@
               field: "count",
               minDataValue: 1,
               maxDataValue: 100,
-              minSize: 20,
-              maxSize: 80
+              minSize: 14,
+              maxSize: 40
             }]
           },
           labelingInfo: [new LabelClass({
