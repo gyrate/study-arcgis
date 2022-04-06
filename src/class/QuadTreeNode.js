@@ -59,11 +59,15 @@ class  Extent{
  */
 class QuadTreeNode {
 
+  //四叉树的最大深度
+  MAX_DEEP = 50
+
   constructor(data, conf) {
     //节点范围
     this.extent =  new Extent(conf.extent)
     // 节点数据容量
     this.bucketLimit = conf.bucketLimit || 10
+    this.deep = conf.deep || 0
     //存储的数据点
     this.points = data
     this.init()
@@ -93,10 +97,10 @@ class QuadTreeNode {
     const w = xmax - xmin
 
     //四个象限
-    this.northWest = new QuadTreeNode([], {extent: {xmin, ymin: ymin + h / 2, xmax: xmin + w / 2, ymax}})
-    this.northEast = new QuadTreeNode([], {extent: {xmin: xmin + w / 2, ymin: ymin + h / 2, xmax, ymax}})
-    this.southWest = new QuadTreeNode([], {extent: {xmin, ymin, xmax: xmin + w / 2, ymax: ymin + h / 2}})
-    this.southEast = new QuadTreeNode([], {extent: {xmin: xmin + w / 2, ymin, xmax, ymax: ymin + h / 2}})
+    this.northWest = new QuadTreeNode([], {extent: {xmin, ymin: ymin + h / 2, xmax: xmin + w / 2, ymax}, deep: this.deep+1 })
+    this.northEast = new QuadTreeNode([], {extent: {xmin: xmin + w / 2, ymin: ymin + h / 2, xmax, ymax}, deep: this.deep+1 })
+    this.southWest = new QuadTreeNode([], {extent: {xmin, ymin, xmax: xmin + w / 2, ymax: ymin + h / 2}, deep: this.deep+1 })
+    this.southEast = new QuadTreeNode([], {extent: {xmin: xmin + w / 2, ymin, xmax, ymax: ymin + h / 2}, deep: this.deep+1 })
 
     //填充数据
     this.points.forEach(p => {
@@ -111,6 +115,11 @@ class QuadTreeNode {
       }
     })
     this.points = []
+
+    //控制四叉树的最大深度,避免超过浏览器内存限制
+    if (this.deep > this.MAX_DEEP) {
+      return
+    }
 
     //尝试分裂节点
     this.northWest.split()

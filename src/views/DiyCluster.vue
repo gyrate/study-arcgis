@@ -111,10 +111,12 @@
       },
 
       async getData() {
+
         const res = await axios.get(`${process.env.BASE_URL}/static/massiveData.json`)
 
-        //数量上20000超出浏览器负荷
-        const data = res.data.data.splice(0 ,10000)
+        const data = res.data.data //.splice(0 ,20000)
+
+        console.log(`数据量 ${data.length}`)
 
         this.data = data.map(item => {
           const {id, location} = item
@@ -189,7 +191,7 @@
             },
             symbol: {
               type: "simple-line",
-              color: '#f00',
+              color: '#fff',
               width: 1
             },
             attributes: {}
@@ -225,6 +227,7 @@
 
         this.drawGrid(grids)
 
+        console.time('findPoints')
         let arr = []
         grids.forEach((grid, index) => {
 
@@ -234,6 +237,7 @@
             arr.push(point)
           }
         })
+        console.timeEnd('findPoints')
 
         this.updateClusterLayer(arr)
       },
@@ -328,13 +332,13 @@
               symbol: {
                 type: "simple-marker",
                 color: '#f9170b',
-                outline: {width: 1, color: "#f9170b"}
+                outline: {width: 2, color: "#fff"}
               }
             }, {
               value: 'false',
               symbol: {
                 type: "picture-marker",
-                url: `./static/images/svg/camera_m_1.svg`,
+                url: `./static/images/svg/camera_m_2.svg`,
               }
             }],
             visualVariables:[{
@@ -357,7 +361,7 @@
               haloSize: 1,
               // haloColor: "#FF0F43",
               font:{
-                size: 14,
+                size: 12,
                 weight: "bold"
               }
             }
@@ -385,7 +389,7 @@
 
         //更新图层
         const results = await layer.applyEdits({deleteFeatures, addFeatures});
-        console.log(results)
+        // console.log(results)
       },
 
       createGraphic(item, type) {
