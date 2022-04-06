@@ -247,7 +247,7 @@
           x: totalX / len,
           y: totalY / len,
           count: len,
-          isCluster: len > 1 ? 1 : 0,
+          isCluster: len > 1,
           id
         }
       },
@@ -291,48 +291,42 @@
       async initClusterLayer() {
 
         let layer = new FeatureLayer({
-          id: 'cluster1',
+          id: 'cluster',
           title: '聚合图层',
           outFields: ["*"],
           fields: [
             {name: "ObjectID", type: "string"},
-            {name: "count", type: "string"},
+            {name: "count", type: "integer"},
             {name: "id", type: "string"},
-            {name: "isCluster", type: "integer"},
+            {name: "isCluster", type: "string"},
           ],
           source: [],
           visible: true,
           objectIdField: "ObjectID",
           geometryType: 'point',
-          renderer : {
-            // type: "unique-value",
-            // field: 'isCluster',
-            // defaultSymbol: {type: "simple-fill"},
-            // uniqueValueInfos: [{
-            //   value: 0,
-            //   symbol: {
-            //     type: "simple-fill",
-            //     size: '20px',
-            //     color: "#3c88ff"
-            //   }
-            // },{
-            //   value: 1,
-            //   symbol: {
-            //     type: "simple-fill",
-            //     size: '20px',
-            //     color: "#ff5b58"
-            //   }
-            // }],
-            type: "simple",
-            symbol: {
-              type: "simple-marker",
-              size: '20',
-              color: "#FF0F43",
-              outline: {
-                width: 2,
-                color: "#fff"
+          renderer: {
+            type: 'unique-value',
+            field: 'isCluster',
+            // defaultSymbol: {
+            //   type: "simple-marker",
+            //   color: '#3c88ff',
+            //   outline: {width: 1, color: "#fff"},
+            //   size: '20px',
+            // },
+            uniqueValueInfos: [{
+              value: 'true',
+              symbol: {
+                type: "simple-marker",
+                color: '#f9170b',
+                outline: {width: 1, color: "#f9170b"}
               }
-            },
+            }, {
+              value: 'false',
+              symbol: {
+                type: "picture-marker",
+                url: `./static/images/svg/camera_m_1.svg`,
+              }
+            }],
             visualVariables:[{
               type: "size",
               field: "count",
@@ -344,12 +338,14 @@
           },
           labelingInfo: [new LabelClass({
             labelPlacement: 'center-center',
-            labelExpressionInfo: {expression: "$feature.count"},
+            labelExpressionInfo: {
+              expression: `IIF($feature.count > 1, $feature.count, '' )`
+            },
             symbol: {
               type: "text",
               color: "#fff",
               haloSize: 1,
-              haloColor: "#FF0F43",
+              // haloColor: "#FF0F43",
               font:{
                 size: 14,
                 weight: "bold"
