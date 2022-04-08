@@ -47,8 +47,9 @@
         //创建地图
         const map = new Map({
           // basemap: "osm-standard" //矢量图
-          basemap: "hybrid" //卫星图
-          // ,layers: ['topo-vector']
+          // basemap: "hybrid" //hybrid卫星图 topo 矢量图
+          basemap: "gray" //hybrid卫星图 topo 矢量图
+          // ,layers: ['hybrid','gray','streets','topo-vector']
         })
 
         //创建2D视图
@@ -75,15 +76,15 @@
           await this.getData()
 
           //创建散点图层
-          // this.initPointLayer()
+          this.initPointLayer()
 
           //创建聚合图层
           this.initClusterLayer()
-          //创建聚合类
-          console.time('initClusterClass')
-          await this.initClusterClass()
-          console.timeEnd('initClusterClass')
 
+          //创建聚合对象
+          await this.initClusterClass()
+
+          //更新聚合对象
           this.resetCluster()
         })
 
@@ -148,10 +149,13 @@
 
       },
 
+      //初始化聚合对象
       async initClusterClass() {
         const {xmin, ymin, xmax, ymax} = this.view.extent
         const [minX, minY] = webMercatorUtils.xyToLngLat(xmin, ymin)
         const [maxX, maxY] = webMercatorUtils.xyToLngLat(xmax, ymax)
+
+        console.time('initClusterClass')
 
         //创建四叉树
         const points = [...this.data]
@@ -160,8 +164,79 @@
             bucketLimit: 100
         })
         this.quadTree = tree
+        console.timeEnd('initClusterClass')
+
+        //绘制四叉树的节点网格线
+        this.drawQuadTreeGrid()
       },
 
+
+      drawQuadTreeGrid() {
+
+        if (!this.treeGridLayer) {
+          const layer = new GraphicsLayer({
+            title: '四叉树网格图层',
+            id: 'quadTreeLayer',
+            graphics: [],
+            visible: true
+          })
+          this.map.add(layer)
+          this.treeGridLayer = layer
+        }
+        this.treeGridLayer.removeAll()
+
+        console.time('drawQuadTreeGrid')
+        const lines = []
+        travel(this.quadTree)
+        this.treeGridLayer.addMany(lines)
+        console.timeEnd('drawQuadTreeGrid')
+
+        //遍历树，将每个节点划分保存为线
+        function travel(treeNode){
+          const {extent, northWest, northEast, southWest, southEast, deep} = treeNode
+          const {xmin, ymin, xmax, ymax} = extent
+          const line = new Graphic({
+            geometry: {
+              type: "polyline",
+              paths: [
+                [xmin, ymin],
+                [xmax, ymin],
+                [xmax, ymax],
+                [xmin, ymax],
+                [xmin, ymin],
+              ]
+            },
+            symbol: {
+              type: "simple-line",
+              color: [65, 255, 18, 0.5],
+              width: 1
+            },
+            attributes: {}
+          })
+          lines.push(line)
+
+          //控制绘制的深度，以减少绘制时间
+          if (deep <= 4) {
+
+            if (northWest) {
+              travel(northWest)
+            }
+            if (northEast) {
+              travel(northEast)
+            }
+            if (southWest) {
+              travel(southWest)
+            }
+            if (southEast) {
+              travel(southEast)
+            }
+
+          }
+
+        }
+      },
+
+      //绘制网格线
       drawGrid(grids) {
 
         if (!this.asssetLayer) {
@@ -192,7 +267,7 @@
             },
             symbol: {
               type: "simple-line",
-              color: [255, 255, 255, 0.5],
+              color: '#798ebb',
               width: 1
             },
             attributes: {}
@@ -267,6 +342,7 @@
         }
       },
 
+      //创建不聚合的图层
       initPointLayer() {
 
         const source = this.data.map(item => {
@@ -274,8 +350,8 @@
         })
 
         let layer = new FeatureLayer({
-          id: 'cluster1',
-          title: '聚合图层',
+          id: 'pointsLayer',
+          title: '散点图层',
           outFields: ["*"],
           fields: [
             {name: "ObjectID", type: "string"},
@@ -283,14 +359,14 @@
             {name: "type", type: "string"},
           ],
           source,
-          visible: true,
+          visible: false,
           objectIdField: "ObjectID",
           geometryType: 'point',
           renderer: {
             type: "simple",
             symbol: {
               type: "simple-marker",
-              size: '10',
+              size: '2px',
               color: "#c3ff74",
               outline: {
                 width: 0,
@@ -306,7 +382,7 @@
       async initClusterLayer() {
 
         let layer = new FeatureLayer({
-          id: 'cluster',
+          id: 'clusterLayer',
           title: '聚合图层',
           outFields: ["*"],
           fields: [
@@ -333,7 +409,7 @@
               symbol: {
                 type: "simple-marker",
                 color: '#f9170b',
-                outline: {width: 2, color: "#fff"}
+                outline: {width: 2, color: "#f9874d"}
               }
             }, {
               value: 'false',

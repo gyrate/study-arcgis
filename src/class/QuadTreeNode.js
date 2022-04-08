@@ -9,10 +9,11 @@ class QuadTreeNode {
   MAX_DEEP = 50
 
   constructor(data, conf) {
-    //节点范围
+    // 每个节点的范围 xmin ymin xmax ymax
     this.extent =  new Extent(conf.extent)
-    // 节点数据容量
+    // 节点数据容量,超过该容量则会分裂成4个子节点
     this.bucketLimit = conf.bucketLimit || 10
+    // 当前节点的深度，根节点深度为0
     this.deep = conf.deep || 0
     //存储的数据点
     this.points = data
