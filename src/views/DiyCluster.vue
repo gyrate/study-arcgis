@@ -163,12 +163,13 @@
       },
 
       drawGrid(grids) {
-        console.log('drawGrid')
+
         if (!this.asssetLayer) {
           const layer = new GraphicsLayer({
             title: '网格图层',
             id: 'gridLayer',
-            graphics: []
+            graphics: [],
+            visible: false
           })
           this.map.add(layer)
           this.asssetLayer = layer
@@ -191,7 +192,7 @@
             },
             symbol: {
               type: "simple-line",
-              color: '#fff',
+              color: [255, 255, 255, 0.5],
               width: 1
             },
             attributes: {}
@@ -345,8 +346,8 @@
               type: "size",
               field: "count",
               minDataValue: 1,
-              maxDataValue: 100,
-              minSize: 14,
+              maxDataValue: 1000,
+              minSize: 18,
               maxSize: 40
             }]
           },
