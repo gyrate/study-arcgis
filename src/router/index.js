@@ -12,7 +12,7 @@ VueRouter.prototype.push = function push (location) {
 const routes = [
   {
     path: '/',
-    redirect:'/featureLayer',
+    redirect:'/diyCluster',
   },{
     path: '/featureLayer',
     name: '显示海量点标记',
@@ -21,6 +21,10 @@ const routes = [
     path: '/cluster',
     name: '配置聚合功能',
     component:()=> import(`@/views/UseCluster.vue`)
+  },{
+    path: '/diyCluster',
+    name: '自定义聚合函数',
+    component:()=> import(`@/views/DiyCluster.vue`)
   }, {
     path: '/query',
     name: '图层查找功能',
